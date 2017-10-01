@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <!--
+    <META charset="utf-8">
+    -->
+    <body>
+
+    Option:<br>
+    <select name="s_type" form="form1">
+        <option value="BASIC">BASIC</option>
+        <option value="EPS">EPS</option>
+    </select>
+
+    <form action="/resp" id="form1">
+        Code Name:<br>
+        <input type="text" name="codename"><br>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+
+    {{ parsing_result|safe }}<br>
+
+    </body>
+</html>
