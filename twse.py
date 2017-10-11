@@ -1,3 +1,4 @@
+import sys
 import requests
 import urllib
 import bs4
@@ -25,7 +26,11 @@ def get_payload(code_name):
         'TYPEK': 'all',
         'co_id': code_name,
     }
-    return urllib.urlencode(payload)
+
+    if sys.version_info >= (3,):
+        return urllib.parse.urlencode(payload)
+    else:
+        return urllib.urlencode(payload)
 
 #if __name__ == '__main__':
 def retreive(t, code_name=6414):
