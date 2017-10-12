@@ -6,12 +6,15 @@
     <body>
 
     Option:<br>
-    <select name="s_type" form="form1">
-        <option value="BASIC">BASIC</option>
-        <option value="EPS">EPS</option>
+    <select name="q_option" form="query_form">
+        <option value="BASIC">基本資料(Basic)</option>
+        <option value="DIVIDEND">股利分配(Dividend Distribution)</option>
+        <option value="YEARLY EPS">財務資料分析(Financial Analysis)</option>
+        <option value="QUARTERLY EPS">綜合損益表(季)(Income Statement)</option>
+        <option value="PE RATIO">本益比(P/E Ration)</option>
     </select>
 
-    <form action="/resp" id="form1">
+    <form action="/resp" id="query_form">
         Code Name:<br>
         <input type="text" name="codename"><br>
         <br>
