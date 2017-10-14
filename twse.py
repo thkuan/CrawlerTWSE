@@ -1,7 +1,16 @@
 import sys
 import requests
 import urllib
-import bs4
+from bs4 import BeautifulSoup
+
+dict_maps = {
+    'BASIC': 'basic_info',
+    'DIVIDEND': 'dividend_distr',
+    'YEARLY EPS': 'yearly_eps',
+    'QUARTERLY EPS': 'quarterly_eps',
+    'PE RATIO': 'basic_info',
+    'NET PROFIT PLUS EPS': 'yearly_eps',
+}
 
 def inquiry_web(key):
     web_page = {
@@ -88,19 +97,27 @@ def get_payload(key, code_name):
 
 #if __name__ == '__main__':
 def retreive(key, code_name=6414):
-    dict_maps = {
-        'BASIC': 'basic_info',
-        'DIVIDEND': 'dividend_distr',
-        'YEARLY EPS': 'yearly_eps',
-        'QUARTERLY EPS': 'quarterly_eps',
-        'PE RATIO': 'basic_info',
-    }
     key_val = dict_maps[key]
     s = requests.Session()
     payload = get_payload(key_val, code_name)
     resp = s.post(inquiry_web(key_val), data=payload)
     resp.encoding = 'utf-8'
     if resp.ok:
-        return resp.text
+        if key == "NET PROFIT PLUS EPS":
+            # Parsing EPS SUMMARY
+            return get_eps(resp)
+        else:
+            return resp.text
 
+# Proceed parsing...
+def get_eps(resp):
+    try:
+        soup = BeautifulSoup(resp.text, "html.parser")
+        tb = soup.find_all("table")
+        tb_row = soup.find_all("tr")
+        tb_head = soup.find_all("th", attrs={"class": "tblHead"})
+        reorg_ctnt = tb[2].prettify() + "<table>" + tb_row[3].prettify() + tb_head[19].prettify() + tb_row[18].prettify() + tb_row[19].prettify() + "</table>"
+        return reorg_ctnt
+    except IndexError:
+        return resp.text
 
