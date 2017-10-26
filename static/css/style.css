@@ -11,8 +11,9 @@ html, body {
 .bar:hover {
     fill: red;
 }
-
+/*
 .axis--x path {
     display: none;
 }
+*/
 

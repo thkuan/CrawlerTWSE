@@ -24,10 +24,13 @@
         <input type="text" name="codename"><br>
         <input type="submit" value="Submit"><br>
     </form>
+    {% if json_result %}
+    <script>
+        var json_dataArray = {{ json_result|safe }};
+    </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/barchart.js') }}"></script>
-
-    {{ json_data|safe }}<br>
-    {{ parsing_result|safe }}<br>
+    {% endif %}
+    {{ parsing_result|safe }} <br>
 
     </body>
 </html>

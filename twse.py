@@ -2,6 +2,7 @@ import sys
 import requests
 import urllib
 from bs4 import BeautifulSoup
+import json
 
 DICT_MAPS = {
     # 'Key': a list of sub-keys
@@ -102,40 +103,36 @@ def get_payload(key, code_name, isnew='true', year='105'):
         return urllib.urlencode(payload[key[1]])
 
 #if __name__ == '__main__':
-def retreive(opt2key, code_name='6414'):
+def get_response(opt2key, code_name='6414'):
     key_val = DICT_MAPS[opt2key]
     s = requests.Session()
-
     if 'isnew' in get_payload(key_val, code_name):
         # If there exists a key named isnew in payload, loop begins 2013 (the year gov starts IFRS)
         str_resp_buf = str()
-        dict_eps = dict()
+        list_yr_eps = list()
         for each_yr in range(102, 107):
+            dict_yr_eps = dict()
             payload = get_payload(key_val, code_name, 'false', each_yr)
             resp = s.post(inquiry_web(key_val), data=payload)
             resp.encoding = 'utf-8'
             if resp.ok:
                 if opt2key == "NET PROFIT PLUS EPS":
-                    (str_tmp, dict_eps[each_yr + 1911]) = get_eps(resp)
+                    dict_yr_eps["year"] = str(each_yr + 1911)
+                    (str_tmp, dict_yr_eps["eps"]) = get_eps(resp)
                     str_resp_buf = str_resp_buf + str_tmp
+                    list_yr_eps.append(dict_yr_eps)
                 else:
                     str_resp_buf = str_resp_buf + resp.text
-        #<TODO> Trasfer dict into JSON format and draw on the web by d3.js
-        print(dict_eps)
-        return str_resp_buf
+        # Encode list_yr_eps into JSON format and draw it on the web
+        json_eps = json.dumps(list_yr_eps)
+        return str_resp_buf, json_eps
     else:
         payload = get_payload(key_val, code_name)
         resp = s.post(inquiry_web(key_val), data=payload)
         resp.encoding = 'utf-8'
         if resp.ok:
-            return resp.text
-            '''
-            if opt2key == "NET PROFIT PLUS EPS":
-                # Parsing EPS SUMMARY
-                return get_eps(resp)
-            else:
-                return resp.text
-            '''
+            return resp.text, []
+
 ### Proceed parsing... ###
 def get_eps(resp):
     try:
