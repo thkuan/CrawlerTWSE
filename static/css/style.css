@@ -1,0 +1,18 @@
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+.bar {
+    fill: steelblue;
+    /* stroke: black; */
+}
+
+.bar:hover {
+    fill: red;
+}
+
+.axis--x path {
+    display: none;
+}
+

@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html>
-    <!--
-    <META charset="utf-8">
-    -->
-    <body>
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TWSE Crawler</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
 
+    <body>
     Option:<br>
     <select name="q_option" form="query_form">
         <option value="BASIC">基本資料(Basic)</option>
@@ -18,10 +22,11 @@
     <form action="/resp" id="query_form">
         Code Name:<br>
         <input type="text" name="codename"><br>
-        <br>
-        <input type="submit" value="Submit">
+        <input type="submit" value="Submit"><br>
     </form>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/barchart.js') }}"></script>
 
+    {{ json_data|safe }}<br>
     {{ parsing_result|safe }}<br>
 
     </body>
