@@ -4,7 +4,7 @@ An front-end/back-end application that make a quick reference to Taiwan Stock Ex
 ![Demo](./application.png)
 
 ## Getting Started
-What knowledge you MUST to know:
+What knowledge should you have:
 #### Public data: [**TWSE**](http://mops.twse.com.tw/mops/web/index)
 
 #### A micro python web application framework: [**Flask**](http://flask.pocoo.org/)
