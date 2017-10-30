@@ -9,6 +9,7 @@ var unique_q_yr = ["1-1", "1-2", "1-3", "1-4",
                          "2-1", "2-2", "2-3", "2-4",
                          "3-1", "3-2", "3-3", "3-4",
                          "4-1", "4-2", "4-3"];
+var all_yrs = [2013, 2014, 2015, 2016, 2017];
 var data_arr = [1, 3.12, 4.65, 6.17,
                  1.34, 3.19, 5.38, 8.63,
                  2.53, 5.48, 9.07, 12.57,
@@ -40,6 +41,9 @@ if (typeof(json_dataArray) !== 'undefined') {
     }
     data_arr = acc_eps_arr;
     unique_q_yr = q_arr;
+    all_yrs = eps_yr;
+    all_yrs.push(d3.max(eps_yr) + 1);
+    console.log(all_yrs);
 } else {
     console.log("json_dataArray DO NOT Exist")
 }
@@ -51,16 +55,98 @@ var num_data = data_arr.length,
     bar_spacing = 20;
 
 var max_data = d3.max(data_arr);
-var margin = {top: 20, right: 20, bottom: 40, left: 40};
+var margin = {top: 20, right: 20, bottom: 60, left: 40};
 
 // Define svg element with atributes
-var svg = d3.select("body").append("svg")
-            .attr("height", (data_scale * max_data + margin.top + margin.bottom))
-            .attr("width", data_x_shift + bar_spacing * num_data + margin.left + margin.right);
+var svg = d3.select("body")
+            .append("svg")
+                .attr("height", (data_scale * max_data + margin.top + margin.bottom))
+                .attr("width", data_x_shift + bar_spacing * num_data + margin.left + margin.right);
 
 // Define the margin object with properties for the four sides (clockwise from the top, as in css)
 var graph_width = +svg.attr("width") - margin.left - margin.right,
     graph_height = +svg.attr("height") - margin.top - margin.bottom;
+
+/* [Tips]:
+ * 1. Draw the axes ealier than main chart to make layers in an order
+ */
+
+// Add the quarter x axis
+var x_scale_q = d3.scaleBand()
+                .domain(unique_q_yr)
+                .rangeRound([0, graph_width]);
+                //.paddingInner([0.1]);
+var func_x_axis_q = d3.axisBottom(x_scale_q)
+                    .tickValues(unique_q_yr)
+                    .tickFormat(function(d) {return "Q" + d.slice(-1);});
+var x_axis_q = svg.append("g")
+                    .attr("class", "x axis q")
+                    .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
+                    .call(func_x_axis_q);
+// Add the year x axis
+var x_extent_yr = d3.extent(all_yrs);
+var x_scale_yr = d3.scaleTime()
+                    .domain(x_extent_yr)
+                    .rangeRound([0, graph_width]);
+var func_x_axis_yr = d3.axisBottom(x_scale_yr)
+                        // Turn off visibility of ticks
+                        .tickSize(0)
+                        .tickValues(all_yrs)
+                        .tickPadding(margin.bottom/3)
+                        .tickFormat(function(d) {return (d)});
+var x_axis_yr = svg.append("g")
+                    .attr("class", "x axis yr")
+                    .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
+                    .call(func_x_axis_yr);
+// Turn of the base of axis
+x_axis_yr.select("path")
+            .style("opacity", "0");
+
+x_axis_q.append("text")
+        //.attr("class", "y_axis_name")
+        .attr("y", margin.bottom/2)
+        .attr("x", graph_width/2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("stroke", "black")
+        .text("QUARTERS OVER YEAR");
+
+// Add the y axis
+var y_extent = d3.extent(data_arr);
+var y_scale = d3.scaleLinear()
+                .domain(y_extent)
+                .range([graph_height, 0]);
+var func_y_axis = d3.axisLeft(y_scale);
+var y_axis = svg.append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+                .call(func_y_axis);
+
+// Add the y axis grid
+var func_y_grid = func_y_axis.tickFormat("")
+                            .tickSize(-graph_width, 0);
+
+var y_axis_grid = svg.append("g")
+                .attr("class", "grid")
+                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+                .style("fill", "none")
+                .call(func_y_grid);
+
+// Style the grid
+y_axis_grid.selectAll(".tick line")
+            .style("stroke", "lightgrey")
+            .style("opacity", "0.5");
+            //.style("stroke-dasharray", "10,1");
+
+y_axis.append("text")
+        //.attr("class", "y_axis_name")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (graph_height/2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("stroke", "black")
+        .text("EPS");
 
 // Define a g element in svg that translates the orgin to the top-left corner of the graph area
 var graph = svg.append("g")
@@ -75,56 +161,3 @@ graph.selectAll("rect")
         .attr("width", bar_width)
         .attr("x", function(d, i) {return (i * bar_spacing) + data_x_shift;})
         .attr("y", function(d, i) {return graph_height - (d * data_scale);});
-        // Decide by you to style shapes in css or js
-        //.attr("stroke", "black");
-
-
-// Add the x Axis
-/*
-var x_extent = d3.extent(data_arr, function(i) {return (i)});
-var x_scale = d3.scaleLinear()
-                .domain(x_extent)
-                .range([0, graph_width + margin.right]);
-*/
-var x_scale = d3.scaleBand()
-            .domain(unique_q_yr)
-            .rangeRound([0, graph_width]);
-            //.paddingInner([0.1]);
-var quarter_x_axis = d3.axisBottom(x_scale)
-            .tickValues(unique_q_yr)
-            .tickFormat(function(d) {return "Q" + d.slice(-1);});
-var x_axis = svg.append("g")
-                .attr("class", "x axis")
-                .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
-                .call(quarter_x_axis);
-// Add the y Axis
-var y_extent = d3.extent(data_arr, function(d) {return (d);});
-var y_scale = d3.scaleLinear()
-                .domain(y_extent)
-                .range([graph_height, 0]);
-var eps_y_axis = d3.axisLeft(y_scale);
-var y_axis = svg.append("g")
-                .attr("class", "y axis")
-                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                .call(eps_y_axis);
-
-// Add the y Axis grid
-var eps_y_grid = eps_y_axis
-                        .tickFormat("")
-                        .tickSize(-graph_width, 0);
-var y_axis_grid = svg.append("g")
-                .attr("class", "y axis grid")
-                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                .style("fill", "none")
-                .style("stroke", "lightgrey")
-                .call(eps_y_grid);
-
-y_axis.append("text")
-        //.attr("class", "y_axis_name")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x",0 - (graph_height / 2))
-        .attr("dy", "1em")
-        .style("text-anchor", "middle")
-        .text("EPS");
-
