@@ -36,14 +36,11 @@
     <script type="text/javascript">
         var set_option_type = function(last_option_val){
            var query_form_obj = document.getElementById("query_option");
-           console.log("last option:" + last_option_val);
            var expected_form_obj = query_form_obj.children[last_option_val];
            if(expected_form_obj !== undefined)
            {
-               console.log("change query type");
                expected_form_obj.setAttribute("selected", "selected");
            }
-           console.log(expected_form_obj);
         };
         window.onload = function() {
             set_option_type("{{ last_option_val }}");
