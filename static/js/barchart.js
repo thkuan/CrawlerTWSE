@@ -194,6 +194,22 @@ var graph = svg.append("g")
 var tip = d3.tip()
             .attr('class', 'd3-tip')
             .html(function(d) { return d; });
+
+tip.direction(function(d) {
+    if (d < 0) return 's';
+    else return 'n';
+});
+tip.offset(function(d) {
+    //var test = document.getElementsByClassName("d3-tip:after");
+    if (d < 0) {
+        //return [(tip.style("top") + 10), 0];
+        return [10, 0];
+    } else {
+        //return [(tip.style("top") - 10), 0];
+        return [-10, 0];
+    }
+});
+
 graph.call(tip);
 
 graph.selectAll("rect")
