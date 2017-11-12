@@ -57,14 +57,8 @@ var num_data = data_arr.length,
     data_x_shift = 10,
     bar_width = 10,
     bar_spacing = 20,
-    scale_thold = 5; // <TODO> Fix y scale of data_arr that EPS < 5
-/*
-data_arr.map(function(d){
-    return d * data_scale;
-});
-var max_data = d3.max(data_arr);
-var min_data = d3.min(data_arr);
-*/
+    scale_thold = 5; // Fix y scale of data_arr that abs(max/min(EPS)) < 5
+
 var max_data = data_scale * ((d3.max(data_arr) < scale_thold) ? d3.max(data_arr) * scale_thold : d3.max(data_arr));
 var min_data = data_scale * ((Math.abs(d3.min(data_arr)) < scale_thold) ? d3.min(data_arr) * scale_thold : d3.min(data_arr));
 var margin = {top: 20, right: 20, bottom: 60, left: 40};
@@ -90,9 +84,13 @@ var graph_width = +svg.attr("width") - margin.left - margin.right,
  * Add the y axis
  */
 var y_extent = d3.extent(data_arr);
-/*, function(d){
-    return d * data_scale;
-});*/
+if (Math.abs(y_extent[0]) < scale_thold) {
+    y_extent[0] *= scale_thold;
+}
+if (Math.abs(y_extent[1]) < scale_thold){
+    y_extent[1] *= scale_thold;
+}
+
 var y_scale = d3.scaleLinear()
                 .domain(y_extent)
                 .range([graph_height, 0]);
@@ -209,7 +207,13 @@ graph.selectAll("rect")
                 return "bar positive";
             }
         })
-        .attr("height", function(d) {return Math.abs(d * data_scale);})
+        .attr("height", function(d) {
+            if (d < 0) {
+                return data_scale * Math.abs(d);
+            } else {
+                return data_scale * d;
+            }
+        })
         .attr("width", bar_width)
         .attr("x", function(d, i) {
             // i starts from 0
