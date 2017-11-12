@@ -12,13 +12,13 @@
 
     <body>
     Option:<br>
-    <select name="q_option" form="query_form">
-        <option value="BASIC">基本資料(Basic)</option>
-        <option value="DIVIDEND">股利分配(Dividend Distribution)</option>
-        <option value="YEARLY EPS">財務資料分析(Financial Analysis)</option>
-        <option value="QUARTERLY EPS">綜合損益表(季)(Income Statement)</option>
-        <option value="PE RATIO">本益比(P/E Ration)</option>
-        <option value="NET PROFIT PLUS EPS">每股盈餘(EPS)</option>
+    <select id="query_option" name="q_option" form="query_form">
+        <option name="BASIC" value="BASIC">基本資料(Basic)</option>
+        <option name="DIVIDEND" value="DIVIDEND">股利分配(Dividend Distribution)</option>
+        <option name="YEARLY EPS" value="YEARLY EPS">財務資料分析(Financial Analysis)</option>
+        <option name="QUARTERLY EPS" value="QUARTERLY EPS">綜合損益表(季)(Income Statement)</option>
+        <option name="PE RATIO"  value="PE RATIO">本益比(P/E Ration)</option>
+        <option name="NET PROFIT PLUS EPS" value="NET PROFIT PLUS EPS">每股盈餘(EPS)</option>
     </select>
 
     <form action="/resp" id="query_form">
@@ -33,6 +33,23 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/barchart.js') }}"></script>
     {% endif %}
     {{ parsing_result|safe }} <br>
+    <script type="text/javascript">
+        var set_option_type = function(last_option_val){
+           var query_form_obj = document.getElementById("query_option");
+           console.log("last option:" + last_option_val);
+           var expected_form_obj = query_form_obj.children[last_option_val];
+           if(expected_form_obj !== undefined)
+           {
+               console.log("change query type");
+               expected_form_obj.setAttribute("selected", "selected");
+           }
+           console.log(expected_form_obj);
+        };
+        window.onload = function() {
+            set_option_type("{{ last_option_val }}");
+        };
+
+    </script>
 
     </body>
 </html>
