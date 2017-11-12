@@ -82,6 +82,7 @@ var graph_width = +svg.attr("width") - margin.left - margin.right,
  * Add the y axis
  */
 var y_extent = d3.extent(data_arr);
+console.log(y_extent);
 var y_scale = d3.scaleLinear()
                 .domain(y_extent)
                 .range([graph_height, 0]);
@@ -192,10 +193,10 @@ graph.selectAll("rect")
         .enter().append("rect")
         // Named it as "bar" to be controled by CSS
         .attr("class", "bar")
-        .attr("height", function(d, i) {return (d * data_scale)})
+        .attr("height", function(d) {return Math.abs(d * data_scale);})
         .attr("width", bar_width)
         .attr("x", function(d, i) {return (i * bar_spacing) + data_x_shift;})
-        .attr("y", function(d, i) {return graph_height - (d * data_scale);})
+        .attr("y", function(d) {return graph_height - Math.abs(d * data_scale);})
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide);
 
