@@ -57,16 +57,24 @@ var num_data = data_arr.length,
     data_x_shift = 10,
     bar_width = 10,
     bar_spacing = 20,
-    scale_factor = 5; // Fix y scale of data_arr that EPS < 5
-
+    scale_thold = 5; // <TODO> Fix y scale of data_arr that EPS < 5
+/*
+data_arr.map(function(d){
+    return d * data_scale;
+});
 var max_data = d3.max(data_arr);
+var min_data = d3.min(data_arr);
+*/
+var max_data = data_scale * ((d3.max(data_arr) < scale_thold) ? d3.max(data_arr) * scale_thold : d3.max(data_arr));
+var min_data = data_scale * ((Math.abs(d3.min(data_arr)) < scale_thold) ? d3.min(data_arr) * scale_thold : d3.min(data_arr));
 var margin = {top: 20, right: 20, bottom: 60, left: 40};
 
 // Define svg element with atributes
 var svg = d3.select("body")
             .append("svg")
-                .attr("height", (data_scale * ((max_data > scale_factor) ? max_data : scale_factor * max_data) + margin.top + margin.bottom))
-                .attr("width", data_x_shift + bar_spacing * num_data + margin.left + margin.right);
+                .attr("height", margin.top +
+                    ((min_data < 0) ? max_data + Math.abs(min_data) : max_data) + margin.bottom)
+                .attr("width", margin.left + data_x_shift + bar_spacing * num_data + margin.right);
 
 // Define the margin object with properties for the four sides (clockwise from the top, as in css)
 var graph_width = +svg.attr("width") - margin.left - margin.right,
@@ -82,7 +90,9 @@ var graph_width = +svg.attr("width") - margin.left - margin.right,
  * Add the y axis
  */
 var y_extent = d3.extent(data_arr);
-console.log(y_extent);
+/*, function(d){
+    return d * data_scale;
+});*/
 var y_scale = d3.scaleLinear()
                 .domain(y_extent)
                 .range([graph_height, 0]);
@@ -192,11 +202,26 @@ graph.selectAll("rect")
         .data(data_arr)
         .enter().append("rect")
         // Named it as "bar" to be controled by CSS
-        .attr("class", "bar")
+        .attr("class", function(d) {
+            if (d < 0) {
+                return "bar negative";
+            } else {
+                return "bar positive";
+            }
+        })
         .attr("height", function(d) {return Math.abs(d * data_scale);})
         .attr("width", bar_width)
-        .attr("x", function(d, i) {return (i * bar_spacing) + data_x_shift;})
-        .attr("y", function(d) {return graph_height - Math.abs(d * data_scale);})
+        .attr("x", function(d, i) {
+            // i starts from 0
+            return (i * bar_spacing) + data_x_shift;
+        })
+        .attr("y", function(d) {
+            if (d < 0) {
+                return max_data;
+            } else {
+                return max_data - (d * data_scale);
+            }
+        })
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide);
 

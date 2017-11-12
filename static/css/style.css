@@ -3,13 +3,23 @@ html, body {
     height: 100%;
 }
 
-.bar {
-    fill: steelblue;
+.bar.positive {
+    fill: darkgreen;
     /* stroke: black; */
 }
 
-.bar:hover {
+.bar.negative {
+    fill: darkred;
+    /* stroke: black; */
+}
+
+.bar.positive:hover {
+    fill: chartreuse;
+}
+
+.bar.negative:hover {
     fill: red;
+    /* stroke: black; */
 }
 /*
 .axis--x path {
