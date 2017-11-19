@@ -197,6 +197,9 @@ def get_yr_revenue(resp):
             except IndexError:
                 continue
         # <TODO>: Fix 102 fiscal yr
-        return ("<table>" + trs[3].prettify() + trs[4].prettify() + trs[8].prettify() + trs[37].prettify() + "</table>"), dict_revenue
+        try:
+            return ("<table>" + trs[3].prettify() + trs[4].prettify() + trs[8].prettify() + trs[37].prettify() + "</table>"), dict_revenue
+        except IndexError:
+            return "", dict_revenue
     else:
         return resp.text, dict_revenue
