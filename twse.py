@@ -14,6 +14,7 @@ DICT_MAPS = {
     'NET PROFIT PLUS EPS': ['quarterly_eps', 'type_D'],#['yearly_eps', 'type_C'],
     'PROFIT ANALYSIS': ['profit_analysis', 'type_D'],
     'OPEX': ['opex', 'type_D'],
+    'YEARLY REVENUE': ['revenue', 'type_E'],
 }
 
 def inquiry_web(key):
@@ -24,6 +25,7 @@ def inquiry_web(key):
         'quarterly_eps': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
         'profit_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t163sb08',
         'opex': 'http://mops.twse.com.tw/mops/web/ajax_t163sb09',
+        'revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
     }
 
     return web_page[key[0]]
@@ -95,6 +97,24 @@ def get_payload(key, code_name, isnew='true', year='105'):
             'co_id': code_name,
             'year': year,
         },
+        'type_E':
+        {
+            'encodeURIComponent': '1',
+            'step': '1',
+            'firstin': '1',
+            'off': '1',
+            'keyword4': '',
+            'code1': '',
+            'TYPEK': '',
+            'checkbtn': '',
+            'queryName': 'co_id',
+            'inpuType': 'co_id',
+            'TYPEK': 'all',
+            'isnew': isnew,
+            'co_id': code_name,
+            'year': year,
+            'season': '04',
+        },
     }
 
     if sys.version_info >= (3,):
@@ -139,8 +159,7 @@ def get_eps(resp):
         soup = BeautifulSoup(resp.text, "html.parser")
         trs = soup.find_all("tr")
         dict_eps = dict()
-        for idx, each_td in enumerate(trs[-1].find_all('td'), 1):
-            dict_eps[idx] = each_td.get_text().strip()
+        dict_eps = {idx: each_td.get_text().strip() for idx, each_td in enumerate(trs[-1].find_all('td'), 1)}
         return ("<table>" + trs[0].get_text().strip() + trs[2].get_text().strip() + trs[-1].prettify() + "</table>"), dict_eps
     except IndexError:
         return resp.text, []
