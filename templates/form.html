@@ -15,11 +15,11 @@
     <select id="query_option" name="q_option" form="query_form">
         <option name="BASIC" value="BASIC">基本資料(Basic)</option>
         <option name="DIVIDEND" value="DIVIDEND">股利分配(Dividend Distribution)</option>
-        <option name="YEARLY EPS" value="YEARLY EPS">財務資料分析(Financial Analysis)</option>
-        <option name="QUARTERLY EPS" value="QUARTERLY EPS">綜合損益表(季)(Income Statement)</option>
+        <option name="FINANCIAL ANALYSIS" value="FINANCIAL ANALYSIS">財務資料分析(Financial Analysis)</option>
+        <option name="INCOME STATEMENT" value="INCOME STATEMENT">綜合損益表(季)(Income Statement(Q))</option>
         <option name="PE RATIO"  value="PE RATIO">本益比(P/E Ration)</option>
-        <option name="NET PROFIT PLUS EPS" value="NET PROFIT PLUS EPS">每股盈餘(EPS)</option>
-        <option name="YEARLY REVENUE" value="YEARLY REVENUE">營業收入合計</option>
+        <option name="YEARLY EPS GRAPH" value="YEARLY EPS GRAPH">每股盈餘(EPS)</option>
+        <option name="YEARLY REVENUE GRAPH" value="YEARLY REVENUE GRAPH">歷年營收(Yearly Revenue)</option>
     </select>
 
     <form action="/resp" id="query_form">
@@ -27,11 +27,13 @@
         <input type="text" name="codename"><br>
         <input type="submit" value="Submit"><br>
     </form>
-    {% if json_result %}
+    {% if json_result and last_option_val == "YEARLY EPS GRAPH" %}
     <script>
         var json_dataArray = {{ json_result|safe }};
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/barchart.js') }}"></script>
+    {% elif json_result and last_option_val == "YEARLY REVENUE GRAPH" %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/stacked_barchart.js') }}"></script>
     {% endif %}
     {{ parsing_result|safe }} <br>
     <script type="text/javascript">

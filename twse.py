@@ -8,10 +8,12 @@ DICT_MAPS = {
     # 'Key': a list of sub-keys
     'BASIC': ['basic_info', 'type_A'],
     'DIVIDEND': ['dividend_distr', 'type_B'],
-    'YEARLY EPS': ['yearly_eps', 'type_C'],
-    'QUARTERLY EPS': ['quarterly_eps', 'type_D'],
+    'FINANCIAL ANALYSIS': ['financial_analysis', 'type_C'],
+    'INCOME STATEMENT': ['income_statement_q', 'type_D'],
     'PE RATIO': ['basic_info', 'type_A'],
-    'NET PROFIT PLUS EPS': ['quarterly_eps', 'type_D'],#['yearly_eps', 'type_C'],
+    'YEARLY EPS GRAPH': ['quarterly_eps', 'type_D'],
+    'YEARLY REVENUE GRAPH': ['yearly_revenue', 'type_E'],
+    # Test
     'PROFIT ANALYSIS': ['profit_analysis', 'type_D'],
     'OPEX': ['opex', 'type_D'],
     'YEARLY REVENUE': ['revenue', 'type_E'],
@@ -21,8 +23,10 @@ def inquiry_web(key):
     web_page = {
         'basic_info': 'http://mops.twse.com.tw/mops/web/ajax_t05st03',
         'dividend_distr': 'http://mops.twse.com.tw/mops/web/ajax_t05st09',
-        'yearly_eps': 'http://mops.twse.com.tw/mops/web/ajax_t05st22',
+        'financial_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t05st22',
+        'income_statement_q': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
         'quarterly_eps': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
+        'yearly_revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
         'profit_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t163sb08',
         'opex': 'http://mops.twse.com.tw/mops/web/ajax_t163sb09',
         'revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
@@ -129,23 +133,33 @@ def get_response(opt2key, code_name='6414'):
     if 'isnew' in get_payload(key_val, code_name):
         # If there exists a key named isnew in payload, loop begins 2013 (the year gov starts IFRS)
         str_resp_buf = str()
-        list_yr_eps = list()
+        list_json_data = list()
         for each_yr in range(102, 107):
-            dict_yr_eps = dict()
             payload = get_payload(key_val, code_name, 'false', each_yr)
             resp = s.post(inquiry_web(key_val), data=payload)
             resp.encoding = 'utf-8'
             if resp.ok:
-                if opt2key == "NET PROFIT PLUS EPS":
-                    dict_yr_eps["year"] = str(each_yr + 1911)
+                # Parsing EPS value to make a bar chart
+                if opt2key == "YEARLY EPS GRAPH":
+                    dict_yr_eps = dict()
+                    dict_yr_eps['year'] = str(each_yr + 1911)
                     (str_tmp, dict_yr_eps["eps"]) = get_eps(resp)
                     str_resp_buf = str_resp_buf + str_tmp
-                    list_yr_eps.append(dict_yr_eps)
+                    list_json_data.append(dict_yr_eps)
+                # Parsing yearly revenue to make a stacked bar chart
+                elif opt2key == "YEARLY REVENUE GRAPH":
+                    dict_yr_revenue = dict()
+                    dict_yr_revenue['year'] = str(each_yr + 1911)
+                    (str_tmp, dict_yr_revenue['revenue']) = get_yr_revenue(resp)
+                    str_resp_buf = str_resp_buf + str_tmp
+                    list_json_data.append(dict_yr_revenue)
                 else:
                     str_resp_buf = str_resp_buf + resp.text
-        # Encode list_yr_eps into JSON format and draw it on the web
-        json_eps = json.dumps(list_yr_eps)
-        return str_resp_buf, json_eps
+        ## <TODO>: To remove DEBUG code
+        print(list_json_data)
+        # Encode list_json_data into JSON format and draw it on the web
+        json_data = json.dumps(list_json_data)
+        return str_resp_buf, json_data
     else:
         payload = get_payload(key_val, code_name)
         resp = s.post(inquiry_web(key_val), data=payload)
@@ -155,24 +169,34 @@ def get_response(opt2key, code_name='6414'):
 
 ### Proceed parsing... ###
 def get_eps(resp):
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    trs = soup.find_all('tr')
+    dict_eps = dict()
     try:
-        soup = BeautifulSoup(resp.text, "html.parser")
-        trs = soup.find_all("tr")
-        dict_eps = dict()
         dict_eps = {idx: each_td.get_text().strip() for idx, each_td in enumerate(trs[-1].find_all('td'), 1)}
         return ("<table>" + trs[0].get_text().strip() + trs[2].get_text().strip() + trs[-1].prettify() + "</table>"), dict_eps
     except IndexError:
-        return resp.text, []
-'''
-def get_eps(resp):
-#'NET PROFIT PLUS EPS': #['yearly_eps', 'type_C'],
-    try:
-        soup = BeautifulSoup(resp.text, "html.parser")
-        tb = soup.find_all("table")
-        tb_row = soup.find_all("tr")
-        tb_head = soup.find_all("th", attrs={"class": "tblHead"})
-        reorg_ctnt = tb[2].prettify() + "<table>" + tb_row[3].prettify() + tb_head[19].prettify() + tb_row[18].prettify() + tb_row[19].prettify() + "</table>"
-        return reorg_ctnt
-    except IndexError:
-        return resp.text
-'''
+        return resp.text, dict_eps
+
+def get_yr_revenue(resp):
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    trs = soup.find_all('tr')
+    dict_revenue = dict()
+    list_cmp_str = [u"營業收入合計", u"母公司業主（淨利／損）"]
+    # List is empty?
+    if len(trs):
+        for each_tr in trs:
+            tmp_tds = each_tr.findAll('td')
+            try:
+                str_cmp_key = tmp_tds[0].get_text().strip()
+                if str_cmp_key in list_cmp_str:
+                    if str_cmp_key == u"營業收入合計":
+                        dict_revenue['all'] = tmp_tds[1].get_text().strip()
+                    elif str_cmp_key == u"母公司業主（淨利／損）":
+                        dict_revenue['self_np'] = tmp_tds[1].get_text().strip()
+            except IndexError:
+                continue
+        # <TODO>: Fix 102 fiscal yr
+        return ("<table>" + trs[3].prettify() + trs[4].prettify() + trs[8].prettify() + trs[37].prettify() + "</table>"), dict_revenue
+    else:
+        return resp.text, dict_revenue
