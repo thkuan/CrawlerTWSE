@@ -33,6 +33,9 @@
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/barchart.js') }}"></script>
     {% elif json_result and last_option_val == "YEARLY REVENUE GRAPH" %}
+    <script>
+        var json_dataArray = {{ json_result|safe }};
+    </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/stacked_barchart.js') }}"></script>
     {% endif %}
     {{ parsing_result|safe }} <br>
