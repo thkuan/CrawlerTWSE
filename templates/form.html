@@ -27,32 +27,37 @@
         <input type="text" name="codename"><br>
         <input type="submit" value="Submit"><br>
     </form>
-    {% if json_result and last_option_val == "YEARLY EPS GRAPH" %}
+
+    <p id="demo"></p>
+
+    {% if json_result and last_opt_val == "YEARLY EPS GRAPH" %}
     <script>
         var json_dataArray = {{ json_result|safe }};
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/barchart.js') }}"></script>
-    {% elif json_result and last_option_val == "YEARLY REVENUE GRAPH" %}
+    {% elif json_result and last_opt_val == "YEARLY REVENUE GRAPH" %}
     <script>
         var json_dataArray = {{ json_result|safe }};
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/stacked_barchart.js') }}"></script>
     {% endif %}
+
     {{ parsing_result|safe }} <br>
+
     <script type="text/javascript">
-        var set_option_type = function(last_option_val){
-           var query_form_obj = document.getElementById("query_option");
-           var expected_form_obj = query_form_obj.children[last_option_val];
-           if(expected_form_obj !== undefined)
-           {
-               expected_form_obj.setAttribute("selected", "selected");
-           }
+        var set_option_type = function(last_val) {
+            var query_form_obj = document.getElementById("query_option");
+            var expected_form_obj = query_form_obj.children[last_val];
+            if (expected_form_obj !== undefined) {
+                expected_form_obj.setAttribute("selected", "selected");
+            }
+            // Record last input codename value
+            document.getElementsByName("codename")[0].value = {{ last_in_val|safe }};
+            document.getElementById("demo").innerHTML = {{ last_in_val }};
         };
         window.onload = function() {
-            set_option_type("{{ last_option_val }}");
+            set_option_type("{{ last_opt_val|safe }}");
         };
-
     </script>
-
     </body>
 </html>

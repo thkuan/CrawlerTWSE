@@ -15,5 +15,4 @@ def get_resp():
         query_type = request.args.get('q_option')
         query_company = request.args.get('codename')
         (text_result, json_data) = get_response(query_type, query_company)
-        return render_template('form.html', parsing_result=text_result, json_result=json_data, last_option_val=query_type)
-        #return render_template('form.html', parsing_result=get_response(query_type, query_company))
+        return render_template('form.html', parsing_result=text_result, json_result=json_data, last_opt_val=query_type, last_in_val=query_company)
