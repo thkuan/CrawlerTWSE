@@ -55,9 +55,14 @@
             document.getElementsByName("codename")[0].value = {{ last_in_val|safe }};
             document.getElementById("demo").innerHTML = {{ last_in_val }};
         };
+        /*
         window.onload = function() {
             set_option_type("{{ last_opt_val|safe }}");
         };
+        */
+        window.addEventListener ?
+        window.addEventListener("load", set_option_type("{{ last_opt_val|safe }}"), false) :
+        window.attachEvent && window.attachEvent("onload", set_option_type("{{ last_opt_val|safe }}"));
     </script>
     </body>
 </html>
