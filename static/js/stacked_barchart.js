@@ -11,19 +11,34 @@ var years = [],
     main_keys = [],
     stack_keys = [];
 
-/*
+
 if (typeof(json_dataArray) !== 'undefined') {
+    /* Preprocess data before turning it into visualization */
     console.log("json_dataArray Exists")
-    for (var idx = 0; idx < json_dataArray.length; idx++) {
-        if (Object.keys(json_dataArray[idx].revenue).length !== 0) {
-            years.push(json_dataArray[idx].year);
-        }
-    }
     main_keys = Object.keys(json_dataArray[0]),
     stack_keys = Object.keys(json_dataArray[0][main_keys[1]]);
+    var len = json_dataArray.length;
+    for (var idx = 0; idx < len; idx++) {
+        /* Pop out the last member in json_dataArray */
+        var tmp_obj = json_dataArray.pop();
+        /* Do nothing if the value of main_keys[1] (i.e., "revenue") is {} */
+        if (Object.keys(tmp_obj[main_keys[1]]).length !== 0) {
+            /* Get the value of main_keys[1] */
+            var tmp_reorg_obj = tmp_obj[main_keys[1]];
+            /* Regular expression to parse string number to integer */
+            for (key in tmp_reorg_obj) {
+                tmp_reorg_obj[key] = parseInt(tmp_reorg_obj[key].replace(/[^0-9.]/g, ""));
+            }
+            /* Insert the main_keys[0] into the reorg object */
+            tmp_reorg_obj[main_keys[0]] = tmp_obj[main_keys[0]];
+            /* Push in front of original data array */
+            json_dataArray.unshift(tmp_reorg_obj);
+            years.unshift(tmp_obj[main_keys[0]]);
+        }
+    }
 } else {
     console.log("json_dataArray DO NOT Exist")
-*/    json_dataArray = [
+    json_dataArray = [
         {'year': '2013', 'all': 3095969, 'self_np': 371827},
         {'year': '2014', 'all': 5052080, 'self_np': 562161},
         {'year': '2015', 'all': 11056658, 'self_np': 865701},
@@ -31,7 +46,7 @@ if (typeof(json_dataArray) !== 'undefined') {
     years = ["2013", "2014", "2015"],
     main_keys = Object.keys(json_dataArray[0]),
     stack_keys = main_keys.slice(1, 3);
-//}
+}
 
 
 /*
