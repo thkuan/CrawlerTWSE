@@ -8,20 +8,18 @@
 7. v4 tip: http://bl.ocks.org/davegotz/bd54b56723c154d25eedde6504d30ad7
 8. https://github.com/Caged/d3-tip
 */
+
 // Must be unique
-var unique_q_yr = ["1-1", "1-2", "1-3", "1-4",
-                         "2-1", "2-2", "2-3", "2-4",
-                         "3-1", "3-2", "3-3", "3-4",
-                         "4-1", "4-2", "4-3"];
-var all_yrs = [2013, 2014, 2015, 2016, 2017];
-var data_arr = [1, 3.12, 4.65, 6.17,
-                 1.34, 3.19, 5.38, 8.63,
-                 2.53, 5.48, 9.07, 12.57,
-                 3.28, 7.06, 10.56];
+var unique_q_yr = [],
+    all_yrs = [],
+    data_arr = [];
 
 if (typeof(json_dataArray) !== 'undefined') {
+    /*
+     * Use front-end environment to preprocess data array
+     * before turning it into visualization
+     */
     console.log("json_dataArray Exists")
-    // Use front-end environment to preprocess data array
     var main_keys = Object.keys(json_dataArray[0]);
     var eps_yr = [];
     var acc_eps_arr = [];
@@ -50,6 +48,15 @@ if (typeof(json_dataArray) !== 'undefined') {
     console.log(all_yrs);
 } else {
     console.log("json_dataArray DO NOT Exist")
+    unique_q_yr = ["1-1", "1-2", "1-3", "1-4",
+                   "2-1", "2-2", "2-3", "2-4",
+                   "3-1", "3-2", "3-3", "3-4",
+                   "4-1", "4-2", "4-3"];
+    all_yrs = [2013, 2014, 2015, 2016, 2017];
+    data_arr = [1, 3.12, 4.65, 6.17,
+                1.34, 3.19, 5.38, 8.63,
+                2.53, 5.48, 9.07, 12.57,
+                3.28, 7.06, 10.56];
 }
 
 var num_data = data_arr.length,
