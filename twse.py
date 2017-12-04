@@ -148,11 +148,11 @@ def get_response(opt2key, code_name='6414'):
                     list_json_data.append(dict_yr_eps)
                 # Parsing yearly revenue to make a stacked bar chart
                 elif opt2key == "YEARLY REVENUE GRAPH":
-                    dict_yr_revenue = dict()
-                    dict_yr_revenue['year'] = str(each_yr + 1911)
-                    (str_tmp, dict_yr_revenue['revenue']) = get_yr_revenue(resp)
+                    dict_yr_rev = dict()
+                    dict_yr_rev['year'] = str(each_yr + 1911)
+                    (str_tmp, dict_yr_rev['revenue'], dict_yr_rev['key_order']) = get_yr_revenue(resp)
                     str_resp_buf = str_resp_buf + str_tmp
-                    list_json_data.append(dict_yr_revenue)
+                    list_json_data.append(dict_yr_rev)
                 else:
                     str_resp_buf = str_resp_buf + resp.text
         ## <TODO>: To remove DEBUG code
@@ -181,7 +181,10 @@ def get_eps(resp):
 def get_yr_revenue(resp):
     soup = BeautifulSoup(resp.text, 'html.parser')
     trs = soup.find_all('tr')
-    dict_revenue = dict()
+    # Revenue distribution
+    dict_rev_dist = dict()
+    # Distribution keys
+    list_keys = list()
     list_cmp_str = [u"營業收入合計", u"母公司業主（淨利／損）"]
     # List is empty?
     if len(trs):
@@ -191,15 +194,17 @@ def get_yr_revenue(resp):
                 str_cmp_key = tmp_tds[0].get_text().strip()
                 if str_cmp_key in list_cmp_str:
                     if str_cmp_key == u"營業收入合計":
-                        dict_revenue['all'] = tmp_tds[1].get_text().strip()
+                        dict_rev_dist['all'] = tmp_tds[1].get_text().strip()
+                        list_keys.append('all')
                     elif str_cmp_key == u"母公司業主（淨利／損）":
-                        dict_revenue['self_np'] = tmp_tds[1].get_text().strip()
+                        dict_rev_dist['self_np'] = tmp_tds[1].get_text().strip()
+                        list_keys.insert(0, 'self_np')
             except IndexError:
                 continue
-        # <TODO>: Fix 102 fiscal yr
+        # Static indice may cause exception, i.e., 102 fiscal yr
         try:
-            return ("<table>" + trs[3].prettify() + trs[4].prettify() + trs[8].prettify() + trs[37].prettify() + "</table>"), dict_revenue
+            return ("<table>" + trs[3].prettify() + trs[4].prettify() + trs[8].prettify() + trs[37].prettify() + "</table>"), dict_rev_dist, list_keys
         except IndexError:
-            return "", dict_revenue
+            return "", dict_rev_dist, list_keys
     else:
-        return resp.text, dict_revenue
+        return resp.text, dict_rev_dist, list_keys

@@ -13,10 +13,15 @@ var years = [],
 
 
 if (typeof(json_dataArray) !== 'undefined') {
-    /* Preprocess data before turning it into visualization */
+    /*
+     * Use front-end environment to preprocess data array
+     * before turning it into visualization
+     */
     console.log("json_dataArray Exists")
+    /* Notice that key order depends on the json_dataArray object */
     main_keys = Object.keys(json_dataArray[0]),
-    stack_keys = Object.keys(json_dataArray[0][main_keys[1]]);
+    /* The order of stacked_keys is used to generate series (layers) */
+    stack_keys = json_dataArray[0][main_keys[2]];
     var len = json_dataArray.length;
     for (var idx = 0; idx < len; idx++) {
         /* Pop out the last member in json_dataArray */
@@ -28,6 +33,12 @@ if (typeof(json_dataArray) !== 'undefined') {
             /* Regular expression to parse string number to integer */
             for (key in tmp_reorg_obj) {
                 tmp_reorg_obj[key] = parseInt(tmp_reorg_obj[key].replace(/[^0-9.]/g, ""));
+            }
+            /* Revenue subtract others */
+            for (key in tmp_reorg_obj) {
+                if (key !== stack_keys[stack_keys.length-1]) {
+                    tmp_reorg_obj[stack_keys[stack_keys.length-1]] -= tmp_reorg_obj[key];
+                }
             }
             /* Insert the main_keys[0] into the reorg object */
             tmp_reorg_obj[main_keys[0]] = tmp_obj[main_keys[0]];
@@ -69,11 +80,11 @@ var stk_layers = stack(json_dataArray);
 
 // Create a svg
 var svg = d3.select("body").append("svg")
-            .attr("height", "400")
-            .attr("width", "300")
+            .attr("height", "200")
+            .attr("width", "250")
             .style("background-color", "white");
 
-var margin = {top: 20, right: 20, bottom: 40, left: 70},
+var margin = {top: 20, right: 20, bottom: 40, left: 80},
     graph_width = +svg.attr("width") - margin.left - margin.right,
     graph_height = +svg.attr("height") - margin.top - margin.bottom;
 
@@ -89,6 +100,14 @@ var x_axis = svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
                 .call(func_x_axis);
+x_axis.append("text")
+        .attr("y", margin.bottom/2)
+        .attr("x", graph_width/2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("stroke", "black")
+        .style("fill", "black")
+        .text("REVENUE/NET PROFIT OVER YEAR");
 
 /* Set y axis */
 var y_scale = d3.scaleLinear()
@@ -100,6 +119,15 @@ var y_axis = svg.append("g")
                 .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
                 .call(func_y_axis);
 
+y_axis.append("text")
+        .attr("y", 0 - margin.top)
+        .attr("x", 0 - margin.left/2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("stroke", "black")
+        .style("fill", "black")
+        .text("$TWD K");
+
 /* Draw graphs with stk_layers input data */
 var graph = svg.selectAll(".layer")
                 .data(stk_layers)
@@ -109,7 +137,7 @@ var graph = svg.selectAll(".layer")
                     .style("fill", function(d, i) { return stk_layer_color(i); });
 /* Draw stacked bars with stk_layers input data */
 graph.selectAll("rect")
-        .data(function(d) { console.log(d);return d; })
+        .data(function(d) { return d; })
         .enter().append("rect")
             .attr("x", function(d) { return x_scale(d.data.year); })
             .attr("y", function(d) { return y_scale(d[1]); })
