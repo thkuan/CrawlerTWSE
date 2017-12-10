@@ -1,6 +1,5 @@
 /*
 1. CSV, https://bl.ocks.org/mbostock/3886208
-                console.log(d.indexOf(d));
 2. CSV, https://bl.ocks.org/DimsumPanda/689368252f55179e12185e13c5ed1fee
 3. json, https://bl.ocks.org/caravinden/8979a6c1063a4022cbd738b4498a0ba6
 4. slice(), https://www.w3schools.com/jsref/jsref_slice_array.asp
@@ -14,7 +13,7 @@ var json_dataArray = [
 {'year': '2015', 'revenue': {'all': '11,056,658', 'self_np': '865,701'}, 'key_order': ['self_np', 'all']},
 {'year': '2016', 'revenue': {'all': '14,471,649', 'self_np': '1,022,743'}, 'key_order': ['self_np', 'all']},
 {'year': '2017', 'revenue': {}, 'key_order': []}
-]
+];
 */
 
 var years = [],
@@ -83,22 +82,13 @@ var stack = d3.stack()
                 .offset(d3.stackOffsetNone);
 var stk_layers = stack(json_dataArray);
 
-// Create a svg
-/*
-var svg = d3.select("body").append("svg")
-            .attr("height", "200")
-            .attr("width", "250")
-            .style("background-color", "white");
-*/
-
 var margin = {top: 20, right: 20, bottom: 40, left: 80};
-//    graph_width = +svg.attr("width") - margin.left - margin.right,
-//    graph_height = +svg.attr("height") - margin.top - margin.bottom;
-
-var svg = d3.select("body").append("svg")
-            .attr("height", "200")
-            .attr("width", margin.left + data_x_shift + bar_spacing * num_data + margin.right)
-            .style("background-color", "white");
+/* Create a svg */
+var svg = d3.select("body")
+                .append("svg")
+                .attr("height", "200")
+                .attr("width", margin.left + data_x_shift + bar_spacing * num_data + margin.right)
+                .style("background-color", "white");
 
 var graph_width = +svg.attr("width") - margin.left - margin.right,
     graph_height = +svg.attr("height") - margin.top - margin.bottom;
@@ -109,7 +99,9 @@ var x_scale = d3.scaleBand()
             .rangeRound([0, graph_width]);
 var func_x_axis = d3.axisBottom(x_scale)
                     .tickValues(years)
-                    .tickFormat(function(d) {return (d)});
+                    .tickFormat(function(d) {
+                        return (d);
+                    });
 var x_axis = svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
@@ -146,30 +138,35 @@ y_axis.append("text")
 var graph = svg.selectAll(".layer")
                 .data(stk_layers)
                 .enter().append("g")
-                    .attr("class", "layer")
-                    .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                    .style("fill", function(d, i) { return stk_layer_color(i); });
+                .attr("class", "layer")
+                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+                .style("fill", function(d, i) {
+                    return stk_layer_color(i);
+                });
 
 /* Draw stacked bars with stk_layers input data */
 graph.selectAll("rect")
         .data( function(d, i) {
-            console.log(i);
-            console.log(d);
             return d;
         })
         .enter().append("rect")
-            .attr("class", function(d) {
-                var l_ldx;
-                for (l_ldx = 0; l_ldx < stk_layers.length; l_ldx++) {
-                    if (stk_layers[l_ldx].indexOf(d) !== -1) {
-                        break;
-                    }
+        .attr("class", function(d) {
+            /* Identify the data obj on which layers */
+            var l_ldx;
+            for (l_ldx = 0; l_ldx < stk_layers.length; l_ldx++) {
+                if (stk_layers[l_ldx].indexOf(d) !== -1) {
+                    break;
                 }
-                return "bar" + l_ldx;
-            })
-            .attr("x", function(d, i) {
-                return x_scale(d.data.year) + data_x_shift;
-            })
-            .attr("y", function(d) { return y_scale(d[1]); })
-            .attr("height", function(d) { return y_scale(d[0]) - y_scale(d[1]); })
-            .attr("width", bar_width);
+            }
+            return "bar" + l_ldx;
+        })
+        .attr("x", function(d, i) {
+            return data_x_shift + x_scale(d.data.year);
+        })
+        .attr("y", function(d) {
+            return y_scale(d[1]);
+        })
+        .attr("height", function(d) {
+            return y_scale(d[0]) - y_scale(d[1]);
+        })
+        .attr("width", bar_width);

@@ -8,10 +8,20 @@
 7. v4 tip: http://bl.ocks.org/davegotz/bd54b56723c154d25eedde6504d30ad7
 8. https://github.com/Caged/d3-tip
 */
+/*
+// Samples
+var json_dataArray = [
+{'year': '2013', 'eps': {1: '-', 2: '3.12', 3: '4.65', 4: '6.17'}},
+{'year': '2014', 'eps': {1: '1.34', 2: '3.19', 3: '5.38', 4: '8.63'}},
+{'year': '2015', 'eps': {1: '2.53', 2: '5.48', 3: '9.07', 4: '12.57'}},
+{'year': '2016', 'eps': {1: '3.28', 2: '7.06', 3: '10.56', 4: '14.01'}},
+{'year': '2017', 'eps': {1: '2.43', 2: '6.17', 3: '10.30', 4: '-'}}
+];
+*/
 
-// Must be unique
+/* unique_q_yr Must be unique */
 var unique_q_yr = [],
-    all_yrs = [],
+    years = [],
     data_arr = [];
 
 if (typeof(json_dataArray) !== 'undefined') {
@@ -43,16 +53,15 @@ if (typeof(json_dataArray) !== 'undefined') {
     }
     data_arr = acc_eps_arr;
     unique_q_yr = q_arr;
-    all_yrs = eps_yr;
-    all_yrs.push(d3.max(eps_yr) + 1);
-    console.log(all_yrs);
+    years = eps_yr;
+    years.push(d3.max(eps_yr) + 1);
 } else {
     console.log("json_dataArray DO NOT Exist")
     unique_q_yr = ["1-1", "1-2", "1-3", "1-4",
                    "2-1", "2-2", "2-3", "2-4",
                    "3-1", "3-2", "3-3", "3-4",
                    "4-1", "4-2", "4-3"];
-    all_yrs = [2013, 2014, 2015, 2016, 2017];
+    years = [2013, 2014, 2015, 2016, 2017];
     data_arr = [1, 3.12, 4.65, 6.17,
                 1.34, 3.19, 5.38, 8.63,
                 2.53, 5.48, 9.07, 12.57,
@@ -65,20 +74,25 @@ var num_data = data_arr.length,
     bar_width = 10,
     bar_spacing = 20,
     half_bar_width = bar_width/2;
-    scale_thold = 5; // Fix y scale of data_arr that abs(max/min(EPS)) < 5
+    /* Fix y scale of data_arr that abs(max/min(EPS)) < 5 */
+    scale_thold = 5;
 
 var max_data = data_scale * ((d3.max(data_arr) < scale_thold) ? d3.max(data_arr) * scale_thold : d3.max(data_arr));
 var min_data = data_scale * ((Math.abs(d3.min(data_arr)) < scale_thold) ? d3.min(data_arr) * scale_thold : d3.min(data_arr));
 var margin = {top: 20, right: 20, bottom: 60, left: 40};
 
-// Define svg element with atributes
+/*
+ * Define svg element with atributes
+ */
 var svg = d3.select("body")
             .append("svg")
-                .attr("height", margin.top +
-                    ((min_data < 0) ? max_data + Math.abs(min_data) : max_data) + margin.bottom)
-                .attr("width", margin.left + data_x_shift + bar_spacing * num_data + margin.right);
+            .attr("height", margin.top + ((min_data < 0) ? max_data + Math.abs(min_data) : max_data) + margin.bottom)
+            .attr("width", margin.left + data_x_shift + bar_spacing * num_data + margin.right);
 
-// Define the margin object with properties for the four sides (clockwise from the top, as in css)
+/*
+ * Define the margin object with properties for the four sides
+ * (clockwise from the top, as in css)
+ */
 var graph_width = +svg.attr("width") - margin.left - margin.right,
     graph_height = +svg.attr("height") - margin.top - margin.bottom;
 
@@ -115,10 +129,10 @@ var func_y_grid = func_y_axis.tickFormat("")
                             .tickSize(-graph_width, 0);
 
 var y_axis_grid = svg.append("g")
-                .attr("class", "grid")
-                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
-                .style("fill", "none")
-                .call(func_y_grid);
+                        .attr("class", "grid")
+                        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
+                        .style("fill", "none")
+                        .call(func_y_grid);
 
 /*
  * Style the y axis grid in grey
@@ -153,7 +167,9 @@ var x_scale_q = d3.scaleBand()
                 //.paddingInner([0.1]);
 var func_x_axis_q = d3.axisBottom(x_scale_q)
                     .tickValues(unique_q_yr)
-                    .tickFormat(function(d) {return "Q" + d.slice(-1);});
+                    .tickFormat(function(d) {
+                        return "Q" + d.slice(-1);
+                    });
 var x_axis_q = svg.append("g")
                     .attr("class", "x axis q")
                     .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
@@ -162,16 +178,18 @@ var x_axis_q = svg.append("g")
 /*
  * Add the year x axis
  */
-var x_extent_yr = d3.extent(all_yrs);
+var x_extent_yr = d3.extent(years);
 var x_scale_yr = d3.scaleTime()
                     .domain(x_extent_yr)
                     .rangeRound([0, graph_width]);
 var func_x_axis_yr = d3.axisBottom(x_scale_yr)
-                        // Turn off visibility of ticks
+                        /* Turn off the visibility of ticks */
                         .tickSize(0)
-                        .tickValues(all_yrs)
+                        .tickValues(years)
                         .tickPadding(margin.bottom/3)
-                        .tickFormat(function(d) {return (d)});
+                        .tickFormat(function(d) {
+                            return (d);
+                        });
 var x_axis_yr = svg.append("g")
                     .attr("class", "x axis yr")
                     .attr("transform", "translate(" + margin.left + ", " + (svg.attr("height") - margin.bottom) + ")")
@@ -199,15 +217,17 @@ x_axis_q.append("text")
 var graph = svg.append("g")
                 .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-var tip = d3.tip()
+var func_tip = d3.tip()
             .attr('class', 'd3-tip')
-            .html(function(d) { return d; });
+            .html(function(d) {
+                return d;
+            });
 
-tip.direction(function(d) {
+func_tip.direction(function(d) {
     if (d < 0) return 's';
     else return 'n';
 });
-tip.offset(function(d) {
+func_tip.offset(function(d) {
     //var test = document.getElementsByClassName("d3-tip:after");
     if (d < 0) {
         //return [(tip.style("top") + 10), 0];
@@ -217,31 +237,30 @@ tip.offset(function(d) {
         return [-10, 0];
     }
 });
+graph.call(func_tip);
 
-graph.call(tip);
-var get_x_pos = function(d, i) {
-    // i starts from 0
+var func_get_x_pos = function(d, i) {
+    /* i starts from 0 */
     return (i * bar_spacing) + data_x_shift;
 }
-
-var get_y_pos = function(d) {
+var func_get_y_pos = function(d) {
     if (d < 0) {
-	return max_data;
+	    return max_data;
     } else {
-	return max_data - (d * data_scale);
+	    return max_data - (d * data_scale);
     }
 }
-var get_height = function(d) {
+var func_get_height = function(d) {
     if (d < 0) {
-	return data_scale * Math.abs(d);
+	    return data_scale * Math.abs(d);
     } else {
-	return data_scale * d;
+	    return data_scale * d;
     }
 }
 graph.selectAll("rect")
         .data(data_arr)
         .enter().append("rect")
-        // Named it as "bar" to be controled by CSS
+        /* Named it as "bar" to be controlled by CSS */
         .attr("class", function(d) {
             if (d < 0) {
                 return "bar negative";
@@ -249,29 +268,31 @@ graph.selectAll("rect")
                 return "bar positive";
             }
         })
-        .attr("height", get_height)
+        .attr("height", func_get_height)
         .attr("width", bar_width)
-        .attr("x", get_x_pos)
-        .attr("y", get_y_pos)
-        .on("mouseover", tip.show)
-	.on("mouseout", tip.hide);
+        .attr("x", func_get_x_pos)
+        .attr("y", func_get_y_pos)
+        .on("mouseover", func_tip.show)
+	    .on("mouseout", func_tip.hide);
 
-var get_path_x_pos = function(d, i){
+var func_get_path_x_pos = function(d, i) {
     d = parseFloat(d);
-    return get_x_pos(d, i) + half_bar_width;
+    return func_get_x_pos(d, i) + half_bar_width;
 }
-var get_path_y_pos = function(d){
+var func_get_path_y_pos = function(d) {
     d = parseFloat(d);
-    return d > 0 ? get_y_pos(d) : get_y_pos(d) + get_height(d); 
+    return (d > 0) ? func_get_y_pos(d) : func_get_y_pos(d) + func_get_height(d);
 }
 var valueline = d3.line()
-.curve(d3.curveLinear)
-    .x(get_path_x_pos)
-    .y(get_path_y_pos);
-    
+                    .curve(d3.curveLinear)
+                    .x(func_get_path_x_pos)
+                    .y(func_get_path_y_pos);
+
 var line_model= graph.append('path')
-	.datum(data_arr).attr('class', 'line')
-	.style("stroke", function(){
-	    return d3.scaleOrdinal(d3.schemeCategory10)("curveLinear"); })
-	.style("fill", 'none')
-	.attr('d', valueline);
+	                    .datum(data_arr)
+                        .attr('class', 'line')
+	                    .style("stroke", function(){
+	                        return d3.scaleOrdinal(d3.schemeCategory10)("curveLinear");
+                        })
+	                    .style("fill", 'none')
+	                    .attr('d', valueline);
