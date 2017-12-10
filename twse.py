@@ -155,7 +155,7 @@ def get_response(opt2key, code_name='6414'):
                     (str_tmp, dict_yr_rev['revenue'], dict_yr_rev['key_order']) = get_yr_revenue(resp)
                     str_resp_buf = str_resp_buf + str_tmp
                     list_json_data.append(dict_yr_rev)
-                elif opt2key == "YEARLY SHAREHOLDINGS":
+                elif opt2key == "YEARLY SHAREHOLDINGS GRAPH":
                     dict_yr_shares = dict()
                     dict_yr_shares['year'] = str(each_yr + 1911)
                     (str_tmp, dict_yr_shares['shares']) = get_yr_shares(resp)
