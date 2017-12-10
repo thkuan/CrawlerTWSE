@@ -26,11 +26,14 @@ var pie_color = d3.scaleOrdinal(d3.schemeCategory20);
 /* Create svg element */
 var svg = d3.select("body")
             .append("svg")
-            .attr("height", "250")
-            .attr("width", "250")
+            .attr("height", height)
+            .attr("width", width);
+
+var graph_width = +svg.attr("width")/2,
+    graph_height = +svg.attr("height")/2;
 
 var graph = svg.append("g")
-                .attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+            .attr("transform", "translate(" + graph_width + "," + graph_height + ")");
 
 var pie = d3.pie()
             .sort(null)
@@ -40,9 +43,9 @@ var pie = d3.pie()
 var path = d3.arc()
                 .outerRadius(radius - 40)
                 .innerRadius(radius - 60);
-var label = d3.arc()
-            .outerRadius(radius - 50)
-            .innerRadius(radius - 50);
+var txt_label = d3.arc()
+            .outerRadius(radius - 20)
+            .innerRadius(radius - 40);
 
 var arc = graph.selectAll(".arc")
                 .data(pie(json_dataArray))
@@ -57,11 +60,11 @@ arc.append("path")
 
 arc.append("text")
         .attr("transform", function (d) {
-            return "translate(" + label.centroid(d) + ")";
+            return "translate(" + txt_label.centroid(d) + ")";
         })
-        //.attr("x", ".35em")
-        //.attr("y", ".35em")
-        .attr("dy", ".35em")
+        .attr("dy", ".25em")
+        /* Anchor to middle */
+        .style("text-anchor", "middle")
         .text(function (d) {
             return d.data.age;
         });
