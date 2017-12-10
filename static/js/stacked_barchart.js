@@ -1,11 +1,21 @@
 /*
 1. CSV, https://bl.ocks.org/mbostock/3886208
+                console.log(d.indexOf(d));
 2. CSV, https://bl.ocks.org/DimsumPanda/689368252f55179e12185e13c5ed1fee
 3. json, https://bl.ocks.org/caravinden/8979a6c1063a4022cbd738b4498a0ba6
 4. slice(), https://www.w3schools.com/jsref/jsref_slice_array.asp
 5. https://github.com/d3/d3-shape/blob/master/README.md#stack
  */
-//var json_dataArray = [{'year': '2013', 'revenue': {'all': '3,095,969', 'self_np': '371,827'}}, {'year': '2014', 'revenue': {'all': '5,052,080', 'self_np': '562,161'}}, {'year': '2015', 'revenue': {'all': '11,056,658', 'self_np': '865,701'}}, {'year': '2016', 'revenue': {'all': '14,471,649', 'self_np': '1,022,743'}}, {'year': '2017', 'revenue': {}}]
+/*
+// Samples
+var json_dataArray = [
+{'year': '2013', 'revenue': {'all': '3,095,969', 'self_np': '371,827'}, 'key_order': ['self_np', 'all']},
+{'year': '2014', 'revenue': {'all': '5,052,080', 'self_np': '562,161'}, 'key_order': ['self_np', 'all']},
+{'year': '2015', 'revenue': {'all': '11,056,658', 'self_np': '865,701'}, 'key_order': ['self_np', 'all']},
+{'year': '2016', 'revenue': {'all': '14,471,649', 'self_np': '1,022,743'}, 'key_order': ['self_np', 'all']},
+{'year': '2017', 'revenue': {}, 'key_order': []}
+]
+*/
 
 var years = [],
     main_keys = [],
@@ -44,7 +54,7 @@ if (typeof(json_dataArray) !== 'undefined') {
             tmp_reorg_obj[main_keys[0]] = tmp_obj[main_keys[0]];
             /* Push in front of original data array */
             json_dataArray.unshift(tmp_reorg_obj);
-            years.unshift(tmp_obj[main_keys[0]]);
+            years.unshift(parseInt(tmp_obj[main_keys[0]]));
         }
     }
 } else {
@@ -59,16 +69,11 @@ if (typeof(json_dataArray) !== 'undefined') {
     stack_keys = main_keys.slice(1, 3);
 }
 
+var num_data = years.length,
+    data_x_shift = 10,
+    bar_width = 15,
+    bar_spacing = 30;
 
-/*
-// Map data into stacked color domain
-stk_layer_color.domain(d3.keys(json_dataArray[0]).filter(function(key) {return key !== "year";}));
-json_dataArray.forEach(function (d) {
-    var y0 = 0;
-    d.revenue = stk_layer_color.domain().map(function (name) { return {name: name, y0: y0, y1: y0 += +d[name] }; });
-    d.total_revenue = d.revenue[d.revenue.length - 1].y1;
-});
-*/
 var stk_layer_color = d3.scaleOrdinal()
                         .range(["darkred", "steelblue", "#7b6888"]);
                         //d3.scaleOrdinal(d3.schemeCategory20);
@@ -79,20 +84,29 @@ var stack = d3.stack()
 var stk_layers = stack(json_dataArray);
 
 // Create a svg
+/*
 var svg = d3.select("body").append("svg")
             .attr("height", "200")
             .attr("width", "250")
             .style("background-color", "white");
+*/
 
-var margin = {top: 20, right: 20, bottom: 40, left: 80},
-    graph_width = +svg.attr("width") - margin.left - margin.right,
+var margin = {top: 20, right: 20, bottom: 40, left: 80};
+//    graph_width = +svg.attr("width") - margin.left - margin.right,
+//    graph_height = +svg.attr("height") - margin.top - margin.bottom;
+
+var svg = d3.select("body").append("svg")
+            .attr("height", "200")
+            .attr("width", margin.left + data_x_shift + bar_spacing * num_data + margin.right)
+            .style("background-color", "white");
+
+var graph_width = +svg.attr("width") - margin.left - margin.right,
     graph_height = +svg.attr("height") - margin.top - margin.bottom;
 
 /* Set x axis */
 var x_scale = d3.scaleBand()
             .domain(years)
-            .rangeRound([0, graph_width])
-            .padding(0.1);
+            .rangeRound([0, graph_width]);
 var func_x_axis = d3.axisBottom(x_scale)
                     .tickValues(years)
                     .tickFormat(function(d) {return (d)});
@@ -137,10 +151,25 @@ var graph = svg.selectAll(".layer")
                     .style("fill", function(d, i) { return stk_layer_color(i); });
 /* Draw stacked bars with stk_layers input data */
 graph.selectAll("rect")
-        .data(function(d) { return d; })
+        .data( function(d) {
+            return d;
+        })
         .enter().append("rect")
-            .attr("x", function(d) { return x_scale(d.data.year); })
+            // <TODO>: Fix d.index undefined
+            .attr("class", function(d) {
+                return "bar" + d.index;
+            })
+            .attr("x", function(d) {
+                return x_scale(d.data.year) + data_x_shift;
+            })
+            /*
+            .attr("x", years, function(d, i) {
+                console.log(this);
+                return (i * bar_spcaing) + data_x_shift;
+            })
+            */
             .attr("y", function(d) { return y_scale(d[1]); })
             .attr("height", function(d) { return y_scale(d[0]) - y_scale(d[1]); })
-            .attr("width", x_scale.bandwidth());
+            .attr("width", bar_width);
+            //.attr("width", x_scale.bandwidth());
 

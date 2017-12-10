@@ -177,7 +177,7 @@ var x_axis_yr = svg.append("g")
                     .call(func_x_axis_yr);
 
 /*
- * Turn of the base of year x axis
+ * Turn off the base of year x axis
  */
 x_axis_yr.select("path")
             .style("opacity", "0");
