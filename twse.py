@@ -13,11 +13,11 @@ DICT_MAPS = {
     'PE RATIO': ['basic_info', 'type_A'],
     'YEARLY EPS GRAPH': ['quarterly_eps', 'type_D'],
     'YEARLY REVENUE GRAPH': ['yearly_revenue', 'type_E'],
+    'YEARLY SHAREHOLDINGS GRAPH': ['shareholdings', 'type_D'],
     # Test
     'PROFIT ANALYSIS': ['profit_analysis', 'type_D'],
     'OPEX': ['opex', 'type_D'],
     'YEARLY REVENUE': ['revenue', 'type_E'],
-    'YEARLY SHAREHOLDINGS': ['shareholdings', 'type_D']
 }
 
 def inquiry_web(key):
