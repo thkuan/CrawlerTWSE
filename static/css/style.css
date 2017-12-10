@@ -21,9 +21,7 @@ html, body {
     fill: red;
     /* stroke: black; */
 }
-/*
-.axis--x path {
-    display: none;
-}
-*/
 
+.bar0:hover {
+    fill: red;
+}

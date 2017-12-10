@@ -71,7 +71,7 @@ if (typeof(json_dataArray) !== 'undefined') {
 
 var num_data = years.length,
     data_x_shift = 10,
-    bar_width = 15,
+    bar_width = 14,
     bar_spacing = 30;
 
 var stk_layer_color = d3.scaleOrdinal()
@@ -149,27 +149,27 @@ var graph = svg.selectAll(".layer")
                     .attr("class", "layer")
                     .attr("transform", "translate(" + margin.left + ", " + margin.top + ")")
                     .style("fill", function(d, i) { return stk_layer_color(i); });
+
 /* Draw stacked bars with stk_layers input data */
 graph.selectAll("rect")
-        .data( function(d) {
+        .data( function(d, i) {
+            console.log(i);
+            console.log(d);
             return d;
         })
         .enter().append("rect")
-            // <TODO>: Fix d.index undefined
             .attr("class", function(d) {
-                return "bar" + d.index;
+                var l_ldx;
+                for (l_ldx = 0; l_ldx < stk_layers.length; l_ldx++) {
+                    if (stk_layers[l_ldx].indexOf(d) !== -1) {
+                        break;
+                    }
+                }
+                return "bar" + l_ldx;
             })
-            .attr("x", function(d) {
+            .attr("x", function(d, i) {
                 return x_scale(d.data.year) + data_x_shift;
             })
-            /*
-            .attr("x", years, function(d, i) {
-                console.log(this);
-                return (i * bar_spcaing) + data_x_shift;
-            })
-            */
             .attr("y", function(d) { return y_scale(d[1]); })
             .attr("height", function(d) { return y_scale(d[0]) - y_scale(d[1]); })
             .attr("width", bar_width);
-            //.attr("width", x_scale.bandwidth());
-
