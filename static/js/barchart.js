@@ -64,6 +64,7 @@ var num_data = data_arr.length,
     data_x_shift = 10,
     bar_width = 10,
     bar_spacing = 20,
+    half_bar_width = bar_width/2;
     scale_thold = 5; // Fix y scale of data_arr that abs(max/min(EPS)) < 5
 
 var max_data = data_scale * ((d3.max(data_arr) < scale_thold) ? d3.max(data_arr) * scale_thold : d3.max(data_arr));
@@ -218,7 +219,25 @@ tip.offset(function(d) {
 });
 
 graph.call(tip);
+var get_x_pos = function(d, i) {
+    // i starts from 0
+    return (i * bar_spacing) + data_x_shift;
+}
 
+var get_y_pos = function(d) {
+    if (d < 0) {
+	return max_data;
+    } else {
+	return max_data - (d * data_scale);
+    }
+}
+var get_height = function(d) {
+    if (d < 0) {
+	return data_scale * Math.abs(d);
+    } else {
+	return data_scale * d;
+    }
+}
 graph.selectAll("rect")
         .data(data_arr)
         .enter().append("rect")
@@ -230,25 +249,29 @@ graph.selectAll("rect")
                 return "bar positive";
             }
         })
-        .attr("height", function(d) {
-            if (d < 0) {
-                return data_scale * Math.abs(d);
-            } else {
-                return data_scale * d;
-            }
-        })
+        .attr("height", get_height)
         .attr("width", bar_width)
-        .attr("x", function(d, i) {
-            // i starts from 0
-            return (i * bar_spacing) + data_x_shift;
-        })
-        .attr("y", function(d) {
-            if (d < 0) {
-                return max_data;
-            } else {
-                return max_data - (d * data_scale);
-            }
-        })
+        .attr("x", get_x_pos)
+        .attr("y", get_y_pos)
         .on("mouseover", tip.show)
-        .on("mouseout", tip.hide);
+	.on("mouseout", tip.hide);
 
+var get_path_x_pos = function(d, i){
+    d = parseFloat(d);
+    return get_x_pos(d, i) + half_bar_width;
+}
+var get_path_y_pos = function(d){
+    d = parseFloat(d);
+    return d > 0 ? get_y_pos(d) : get_y_pos(d) + get_height(d); 
+}
+var valueline = d3.line()
+.curve(d3.curveLinear)
+    .x(get_path_x_pos)
+    .y(get_path_y_pos);
+    
+var line_model= graph.append('path')
+	.datum(data_arr).attr('class', 'line')
+	.style("stroke", function(){
+	    return d3.scaleOrdinal(d3.schemeCategory10)("curveLinear"); })
+	.style("fill", 'none')
+	.attr('d', valueline);
