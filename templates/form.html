@@ -20,6 +20,7 @@
         <option name="PE RATIO"  value="PE RATIO">本益比(P/E Ration)</option>
         <option name="YEARLY EPS GRAPH" value="YEARLY EPS GRAPH">每股盈餘(EPS)</option>
         <option name="YEARLY REVENUE GRAPH" value="YEARLY REVENUE GRAPH">歷年營收(Yearly Revenue)</option>
+        <option name="YEARLY SHAREHOLDINGS GRAPH" value="YEARLY SHAREHOLDINGS GRAPH">歷年股份分配(Yearly Shareholdings)</option>
     </select>
 
     <form action="/resp" id="query_form">
@@ -40,6 +41,11 @@
         var json_dataArray = {{ json_result|safe }};
     </script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/stacked_barchart.js') }}"></script>
+    {% elif json_result and last_opt_val == "YEARLY SHAREHOLDINGS GRAPH" %}
+    <script>
+        var json_dataArray = {{ json_result|safe }};
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/piechart.js') }}"></script>
     {% endif %}
 
     {{ parsing_result|safe }} <br>

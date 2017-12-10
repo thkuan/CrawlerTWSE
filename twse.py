@@ -13,6 +13,7 @@ DICT_MAPS = {
     'PE RATIO': ['basic_info', 'type_A'],
     'YEARLY EPS GRAPH': ['quarterly_eps', 'type_D'],
     'YEARLY REVENUE GRAPH': ['yearly_revenue', 'type_E'],
+    'YEARLY SHAREHOLDINGS GRAPH': ['shareholdings', 'type_D'],
     # Test
     'PROFIT ANALYSIS': ['profit_analysis', 'type_D'],
     'OPEX': ['opex', 'type_D'],
@@ -30,6 +31,7 @@ def inquiry_web(key):
         'profit_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t163sb08',
         'opex': 'http://mops.twse.com.tw/mops/web/ajax_t163sb09',
         'revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
+        'shareholdings': 'http://mops.twse.com.tw/mops/web/ajax_t16sn02'
     }
 
     return web_page[key[0]]
@@ -153,6 +155,13 @@ def get_response(opt2key, code_name='6414'):
                     (str_tmp, dict_yr_rev['revenue'], dict_yr_rev['key_order']) = get_yr_revenue(resp)
                     str_resp_buf = str_resp_buf + str_tmp
                     list_json_data.append(dict_yr_rev)
+                elif opt2key == "YEARLY SHAREHOLDINGS":
+                    dict_yr_shares = dict()
+                    dict_yr_shares['year'] = str(each_yr + 1911)
+                    (str_tmp, dict_yr_shares['shares']) = get_yr_shares(resp)
+                    str_resp_buf = str_resp_buf + str_tmp
+                    list_json_data.append(dict_yr_shares)
+
                 else:
                     str_resp_buf = str_resp_buf + resp.text
         ## <TODO>: To remove DEBUG code
@@ -208,3 +217,30 @@ def get_yr_revenue(resp):
             return "", dict_rev_dist, list_keys
     else:
         return resp.text, dict_rev_dist, list_keys
+
+
+def get_yr_shares(resp):
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    trs = soup.find_all('tr')
+    end_row = 0
+    begin_row = 0
+    begin_key = u'股東結構類別'
+    end_key = u'股東人數'
+    for row_idx, tr in enumerate(trs):
+        row_text = tr.get_text().strip()
+        if begin_key in row_text:
+            begin_row = row_idx + 1
+        elif end_key in row_text:
+            end_row = row_idx
+            break
+
+    def extract_val(row):
+        result = dict()
+        tds = row.findAll('td')
+        holder_name = tds[1].get_text().strip()
+        holder_num = tds[2].get_text().strip()
+        holder_shares = tds[3].get_text().strip()
+        result[holder_name] = [holder_num, holder_shares]
+        return result
+    shares = list(map(extract_val, trs[begin_row : end_row]))
+    return resp.text, shares
