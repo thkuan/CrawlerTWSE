@@ -6,7 +6,10 @@
 5. Arc Tween, http://bl.ocks.org/mbostock/5100636
 */
 // Samples
-var json_dataArray = [
+//
+tmp_arr = json_dataArray[0].shares;
+
+/*var json_dataArray = [
 {"age": "<5", "population": 2704659},
 {"age": "5-13", "population": 4499890},
 {"age": "14-17", "population": 2159981},
@@ -15,7 +18,18 @@ var json_dataArray = [
 {"age": "45-64", "population": 8819342},
 {"age": "≥65", "population": 612463}
 ];
+*/
+json_dataArray = [{'age': Object.keys(tmp_arr[1])[0], 'population': parseFloat((tmp_arr[1][Object.keys(tmp_arr[1])][1]).replace(/[^0-9]/g, ""))}];
 
+//tmp_arr = tmp_arr.map(function(key1){return {'age': key1, 'population': parseFloat((tmp_arr[key1][1]).replace(/[^0-9]/g, ""))}});
+
+json_dataArray = [];
+tmp_arr.forEach(function(key1, val){
+    json_dataArray.push({'age': Object.keys(key1)[0], 'population': parseFloat(Object.values(key1)[0][1].replace(/[^0-9]/g, ''))});
+});
+
+//json_dataArray = 
+//replace(/[^0-9.]/g, "")};});
 var width = 250,
     height = 250,
     radius = Math.min(width, height)/2;
