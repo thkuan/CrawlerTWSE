@@ -1,161 +1,36 @@
-import sys
 import requests
-import urllib
-from bs4 import BeautifulSoup
 import json
+from bs4 import BeautifulSoup
+from twse_url import TWSEUrlMap
 
-DICT_MAPS = {
-    # 'Key': a list of sub-keys
-    'BASIC': ['basic_info', 'type_A'],
-    'DIVIDEND': ['dividend_distr', 'type_B'],
-    'FINANCIAL ANALYSIS': ['financial_analysis', 'type_C'],
-    'INCOME STATEMENT': ['income_statement_q', 'type_D'],
-    'PE RATIO': ['basic_info', 'type_A'],
-    'YEARLY EPS GRAPH': ['quarterly_eps', 'type_D'],
-    'YEARLY REVENUE GRAPH': ['yearly_revenue', 'type_E'],
-    'YEARLY SHAREHOLDINGS GRAPH': ['shareholdings', 'type_D'],
-    # Test
-    'PROFIT ANALYSIS': ['profit_analysis', 'type_D'],
-    'OPEX': ['opex', 'type_D'],
-    'YEARLY REVENUE': ['revenue', 'type_E'],
-}
-
-def inquiry_web(key):
-    web_page = {
-        'basic_info': 'http://mops.twse.com.tw/mops/web/ajax_t05st03',
-        'dividend_distr': 'http://mops.twse.com.tw/mops/web/ajax_t05st09',
-        'financial_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t05st22',
-        'income_statement_q': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
-        'quarterly_eps': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
-        'yearly_revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
-        'profit_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t163sb08',
-        'opex': 'http://mops.twse.com.tw/mops/web/ajax_t163sb09',
-        'revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
-        'shareholdings': 'http://mops.twse.com.tw/mops/web/ajax_t16sn02'
-    }
-
-    return web_page[key[0]]
-
-def get_payload(key, code_name, isnew='true', year='105'):
-    # Set 'true' or 'false' to isnew argument that enable history statistics inquery
-    payload = {
-        'type_A':
-        {
-            'encodeURIComponent': '1',
-            'step': '1',
-            'firstin': '1',
-            'off': '1',
-            'keyword4': '',
-            'code1': '',
-            'TYPEK2': '',
-            'checkbtn': '',
-            'queryName': 'co_id',
-            'inpuType': 'co_id',
-            'TYPEK': 'all',
-            'co_id': code_name,
-        },
-        'type_B':
-        {
-            'encodeURIComponent': '1',
-            'step': '1',
-            'firstin': '1',
-            'off': '1',
-            'keyword4': '',
-            'code1': '',
-            'TYPEK2': '',
-            'checkbtn': '',
-            'queryName': 'co_id',
-            'inpuType': 'co_id',
-            'TYPEK': 'all',
-            'isnew': isnew,
-            'co_id': code_name,
-            'year': year,
-        },
-        'type_C':
-        {
-            'encodeURIComponent': '1',
-            'run': 'Y',
-            'step': '1',
-            'TYPEK': 'sii',
-            'year': year,
-            'isnew': isnew,
-            'co_id': code_name,
-            'firstin': '1',
-            'off': '1',
-            'ifrs': 'Y',
-        },
-        'type_D':
-        {
-            'encodeURIComponent': '1',
-            'step': '1',
-            'firstin': '1',
-            'off': '1',
-            'keyword4': '',
-            'code1': '',
-            'TYPEK2': '',
-            'checkbtn': '',
-            'queryName': 'co_id',
-            't05st29_c_ifrs': 'N',
-            't05st30_c_ifrs': 'N',
-            'inpuType': 'co_id',
-            'TYPEK': 'all',
-            'isnew': isnew,
-            'co_id': code_name,
-            'year': year,
-        },
-        'type_E':
-        {
-            'encodeURIComponent': '1',
-            'step': '1',
-            'firstin': '1',
-            'off': '1',
-            'keyword4': '',
-            'code1': '',
-            'TYPEK': '',
-            'checkbtn': '',
-            'queryName': 'co_id',
-            'inpuType': 'co_id',
-            'TYPEK': 'all',
-            'isnew': isnew,
-            'co_id': code_name,
-            'year': year,
-            'season': '04',
-        },
-    }
-
-    if sys.version_info >= (3,):
-        return urllib.parse.urlencode(payload[key[1]])
-    else:
-        return urllib.urlencode(payload[key[1]])
-
-#if __name__ == '__main__':
-def get_response(opt2key, code_name='6414'):
-    key_val = DICT_MAPS[opt2key]
+def get_response(option, code_name='6414'):
+    obj_url = TWSEUrlMap(option, code_name)
     s = requests.Session()
-    if 'isnew' in get_payload(key_val, code_name):
+    if 'isnew' in obj_url.get_form_data():
         # If there exists a key named isnew in payload, loop begins 2013 (the year gov starts IFRS)
         str_resp_buf = str()
         list_json_data = list()
         for each_yr in range(102, 107):
-            payload = get_payload(key_val, code_name, 'false', each_yr)
-            resp = s.post(inquiry_web(key_val), data=payload)
+            # Dynamically changing form data depends on year/quarter/month
+            payload = TWSEUrlMap(option, code_name, 'false', each_yr).get_form_data()
+            resp = s.post(obj_url.get_url(), data=payload)
             resp.encoding = 'utf-8'
             if resp.ok:
                 # Parsing EPS value to make a bar chart
-                if opt2key == "YEARLY EPS GRAPH":
+                if option == "YEARLY EPS GRAPH":
                     dict_yr_eps = dict()
                     dict_yr_eps['year'] = str(each_yr + 1911)
                     (str_tmp, dict_yr_eps["eps"]) = get_eps(resp)
                     str_resp_buf = str_resp_buf + str_tmp
                     list_json_data.append(dict_yr_eps)
                 # Parsing yearly revenue to make a stacked bar chart
-                elif opt2key == "YEARLY REVENUE GRAPH":
+                elif option == "YEARLY REVENUE GRAPH":
                     dict_yr_rev = dict()
                     dict_yr_rev['year'] = str(each_yr + 1911)
                     (str_tmp, dict_yr_rev['revenue'], dict_yr_rev['key_order']) = get_yr_revenue(resp)
                     str_resp_buf = str_resp_buf + str_tmp
                     list_json_data.append(dict_yr_rev)
-                elif opt2key == "YEARLY SHAREHOLDINGS GRAPH":
+                elif option == "YEARLY SHAREHOLDINGS GRAPH":
                     dict_yr_shares = dict()
                     dict_yr_shares['year'] = str(each_yr + 1911)
                     (str_tmp, dict_yr_shares['shares']) = get_yr_shares(resp)
@@ -170,8 +45,8 @@ def get_response(opt2key, code_name='6414'):
         json_data = json.dumps(list_json_data)
         return str_resp_buf, json_data
     else:
-        payload = get_payload(key_val, code_name)
-        resp = s.post(inquiry_web(key_val), data=payload)
+        payload = obj_url.get_form_data()
+        resp = s.post(obj_url.get_url(), data=payload)
         resp.encoding = 'utf-8'
         if resp.ok:
             return resp.text, []
