@@ -29,16 +29,16 @@ class TWSEUrlMap:
 
     def get_url(self):
         dict_req_url = {
-            'basic_info': 'http://mops.twse.com.tw/mops/web/ajax_t05st03',
-            'dividend_distr': 'http://mops.twse.com.tw/mops/web/ajax_t05st09',
-            'financial_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t05st22',
-            'income_statement_q': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
-            'quarterly_eps': 'http://mops.twse.com.tw/mops/web/ajax_t163sb15',
-            'yearly_revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
-            'profit_analysis': 'http://mops.twse.com.tw/mops/web/ajax_t163sb08',
-            'opex': 'http://mops.twse.com.tw/mops/web/ajax_t163sb09',
-            'revenue': 'http://mops.twse.com.tw/mops/web/ajax_t164sb04',
-            'shareholdings': 'http://mops.twse.com.tw/mops/web/ajax_t16sn02'
+            'basic_info': 'https://mops.twse.com.tw/mops/web/ajax_t05st03',
+            'dividend_distr': 'https://mops.twse.com.tw/mops/web/ajax_t05st09',
+            'financial_analysis': 'https://mops.twse.com.tw/mops/web/ajax_t05st22',
+            'income_statement_q': 'https://mops.twse.com.tw/mops/web/ajax_t163sb15',
+            'quarterly_eps': 'https://mops.twse.com.tw/mops/web/ajax_t163sb15',
+            'yearly_revenue': 'https://mops.twse.com.tw/mops/web/ajax_t164sb04',
+            'profit_analysis': 'https://mops.twse.com.tw/mops/web/ajax_t163sb08',
+            'opex': 'https://mops.twse.com.tw/mops/web/ajax_t163sb09',
+            'revenue': 'https://mops.twse.com.tw/mops/web/ajax_t164sb04',
+            'shareholdings': 'https://mops.twse.com.tw/mops/web/ajax_t16sn02'
         }
         return dict_req_url[self.list_key[0]]
 
